@@ -1,4 +1,4 @@
-name: 'build and deploy test server'
+name: 'Fix release'
 on:
     release:
       types:
