@@ -1,0 +1,119 @@
+name: 'Release'
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+
+
+jobs:
+  test: 
+    name: 'Test'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: |
+          npm run lint
+          npm run test
+  
+        
+
+  deploy:
+    name: 'Release ${{ github.run_number }}'
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: releases/${{ github.run_number }}
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Build docker image
+        uses: D3rHase/ssh-command-action@v0.2.2
+        with:
+          host: ${{secrets.SERVER_HOST}}
+          user: ${{secrets.SERVER_USERNAME}}
+          private_key: ${{secrets.SSH_PRIVATE_KEY}}
+          command: |
+            git checkout main;
+            git pull;
+            docker build . \
+            -t cr.yandex/${{secrets.REGISTRY_ID}}/app:${{ github.run_number }}
+            -t cr.yandex/${{secrets.REGISTRY_ID}}/app:${{ github.run_number }}_latest  
+      
+      - name: Uploads to the Container Registry
+        uses: D3rHase/ssh-command-action@v0.2.2
+        with:
+          host: ${{secrets.SERVER_HOST}}
+          user: ${{secrets.SERVER_USERNAME}}
+          private_key: ${{secrets.SSH_PRIVATE_KEY}}
+          command: |
+            git checkout main;
+            git pull;
+            docker push cr.yandex/${{secrets.REGISTRY_ID}}/app:${{ github.run_number }}
+            docker push cr.yandex/${{secrets.REGISTRY_ID}}/app:${{ github.run_number }}_latest  
+
+  create_issue:
+    name: Create team sync issue
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Create team sync issue
+        run: |
+          if [[ $CLOSE_PREVIOUS == true ]]; then
+            previous_issue_number=$(gh issue list \
+              --label "$LABELS" \
+              --json number \
+              --jq '.[0].number')
+            if [[ -n $previous_issue_number ]]; then
+              gh issue close "$previous_issue_number"
+              gh issue unpin "$previous_issue_number"
+            fi
+          fi
+          new_issue_url=$(gh issue create \
+            --title "$TITLE" \
+            --assignee "$ASSIGNEES" \
+            --label "$LABELS" \
+            --body "$BODY")
+          if [[ $PINNED == true ]]; then
+            gh issue pin "$new_issue_url"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TITLE: Team sync
+          ASSIGNEES: monalisa,doctocat,hubot
+          LABELS: weekly sync,docs-team
+          BODY: |
+            ### Agenda
+
+            - [ ] Start the recording
+            - [ ] Check-ins
+            - [ ] Discussion points
+            - [ ] Post the recording
+
+            ### Discussion Points
+            Add things to discuss below
+
+            - [Work this week](https://github.com/orgs/github/projects/3)
+          PINNED: false
+          CLOSE_PREVIOUS: false
