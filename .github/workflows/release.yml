@@ -31,7 +31,7 @@ jobs:
         
 
   deploy:
-    name: 'Release ${{ github.run_number }}'
+    name: 'Release version ${{ github.run_number }}'
     needs: test
     runs-on: ubuntu-latest
 
@@ -53,6 +53,15 @@ jobs:
         with:
           node-version: '20.x'
 
+      - name: Login
+        uses: D3rHase/ssh-command-action@v0.2.2
+        with:
+          command: |
+            docker login \
+            --${{secrets.CONTAINER_USERNAME}} iam \
+            --${{secrets.CONTAINER_PASSWORD}} ${{secrets.CONTAINER_TOKEN}} \
+            cr.yandex
+
       - name: Build docker image
         uses: D3rHase/ssh-command-action@v0.2.2
         with:
@@ -63,9 +72,9 @@ jobs:
           command: |
             git checkout release-${{ github.run_number }};
             git pull;
-            docker build . \
-            -t cr.yandex/${{secrets.REGISTRY_ID}}/app:${{ github.run_number }}
-            -t cr.yandex/${{secrets.REGISTRY_ID}}/app:${{ github.run_number }}_latest  
+
+            docker build -t cr.yandex/${{secrets.REGISTRY_ID}}/app:${{ github.run_number }}
+            docker build -t cr.yandex/${{secrets.REGISTRY_ID}}/app:${{ github.run_number }}_latest  
       
       - name: Uploads to the Container Registry
         uses: D3rHase/ssh-command-action@v0.2.2
