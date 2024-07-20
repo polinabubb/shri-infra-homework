@@ -62,13 +62,13 @@ jobs:
 
       - name: Build docker image
         run: |
-            docker build -t cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra:${{ github.run_number }}
-            docker build -t cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra:${{ github.run_number }}_latest  
+            docker build -t cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra:${{ github.run_number }} .
+            docker build -t cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra:${{ github.run_number }}_latest .  
       
       - name: Uploads to the Container Registry
         run: |
-            docker push cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra:${{ github.run_number }}
-            docker push cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra:${{ github.run_number }}_latest  
+            docker push cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra:${{ github.run_number }} .
+            docker push cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra:${{ github.run_number }}_latest .  
 
   create_issue:
     name: Create team sync issue
