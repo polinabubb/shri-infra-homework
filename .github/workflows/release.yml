@@ -55,7 +55,7 @@ jobs:
 
       - name: Login
         run: |
-            docker login --username oauth --password-stdin ${{secrets.OAUTH_TOKEN}} cr.yandex
+            docker login --username oauth --password-stdin ${{secrets.CONTAINER_PASSWORD}} cr.yandex
 
       - name: Build docker image
         run: |
