@@ -59,6 +59,7 @@ jobs:
           host: ${{secrets.SERVER_HOST}}
           user: ${{secrets.SERVER_USERNAME}}
           private_key: ${{secrets.SSH_PRIVATE_KEY}}
+          public_key: ${{secrets.SSH_PUBLIC_KEY}}
           command: |
             git checkout release-${{ github.run_number }};
             git pull;
