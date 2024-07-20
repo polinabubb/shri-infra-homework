@@ -57,7 +57,7 @@ jobs:
         uses: D3rHase/ssh-command-action@v0.2.2
         with:
           command: |
-            docker login --username iam --password ${{secrets.CONTAINER_TOKEN}} cr.yandex
+            docker login --username iam --password-stdin ${{secrets.CONTAINER_TOKEN}} cr.yandex
 
       - name: Build docker image
         uses: D3rHase/ssh-command-action@v0.2.2
