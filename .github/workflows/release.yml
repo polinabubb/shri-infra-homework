@@ -62,7 +62,7 @@ jobs:
 
       - name: Build docker image
         run: |
-            docker build . -t cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra-2024:${{ github.run_number }} .
+            docker build -t cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra-2024:${{ github.run_number }} .
       
       - name: Uploads to the Container Registry
         run: |
