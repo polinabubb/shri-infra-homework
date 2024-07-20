@@ -59,16 +59,11 @@ jobs:
 
       - name: Build docker image
         run: |
-            git checkout release-${{ github.run_number }};
-            git pull;
-
             docker build -t cr.yandex/${{secrets.REGISTRY_ID}}/app:${{ github.run_number }}
             docker build -t cr.yandex/${{secrets.REGISTRY_ID}}/app:${{ github.run_number }}_latest  
       
       - name: Uploads to the Container Registry
         run: |
-            git checkout release-${{ github.run_number }};
-            git pull;
             docker push cr.yandex/${{secrets.REGISTRY_ID}}/app:${{ github.run_number }}
             docker push cr.yandex/${{secrets.REGISTRY_ID}}/app:${{ github.run_number }}_latest  
 
