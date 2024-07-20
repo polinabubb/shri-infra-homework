@@ -1,8 +1,7 @@
 name: Automated tests
 
 on: 
-  pull_request:
-    branches: [master]
+  pull_request
 
 jobs:
   test: 
