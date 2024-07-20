@@ -60,6 +60,8 @@ jobs:
           user: ${{secrets.SERVER_USERNAME}}
           private_key: ${{secrets.SSH_PRIVATE_KEY}}
           command: |
+            git checkout release-${{ github.run_number }};
+            git pull;
             docker build . \
             -t cr.yandex/${{secrets.REGISTRY_ID}}/app:${{ github.run_number }}
             -t cr.yandex/${{secrets.REGISTRY_ID}}/app:${{ github.run_number }}_latest  
@@ -71,6 +73,8 @@ jobs:
           user: ${{secrets.SERVER_USERNAME}}
           private_key: ${{secrets.SSH_PRIVATE_KEY}}
           command: |
+            git checkout release-${{ github.run_number }};
+            git pull;
             docker push cr.yandex/${{secrets.REGISTRY_ID}}/app:${{ github.run_number }}
             docker push cr.yandex/${{secrets.REGISTRY_ID}}/app:${{ github.run_number }}_latest  
 
