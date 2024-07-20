@@ -66,7 +66,7 @@ jobs:
       
       - name: Uploads to the Container Registry
         run: |
-            docker tag cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra:${{ github.run_number }}_latest cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra:${{ github.run_number }}
+            docker tag cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra:${{ github.run_number }} cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra:${{ github.run_number }}_latest
             docker push cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra:${{ github.run_number }}
             docker push cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra:${{ github.run_number }}_latest 
 
