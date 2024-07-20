@@ -54,19 +54,11 @@ jobs:
           node-version: '20.x'
 
       - name: Login
-        uses: D3rHase/ssh-command-action@v0.2.2
-        with:
-          command: |
-            docker login --username oauth --password-stdin cr.yandex
+        run: |
+            docker login --username oauth --password-stdin ${{secrets.OAUTH_TOKEN}} cr.yandex
 
       - name: Build docker image
-        uses: D3rHase/ssh-command-action@v0.2.2
-        with:
-          host: ${{secrets.SERVER_HOST}}
-          user: ${{secrets.SERVER_USERNAME}}
-          private_key: ${{secrets.SSH_PRIVATE_KEY}}
-          public_key: ${{secrets.SSH_PUBLIC_KEY}}
-          command: |
+        run: |
             git checkout release-${{ github.run_number }};
             git pull;
 
@@ -74,12 +66,7 @@ jobs:
             docker build -t cr.yandex/${{secrets.REGISTRY_ID}}/app:${{ github.run_number }}_latest  
       
       - name: Uploads to the Container Registry
-        uses: D3rHase/ssh-command-action@v0.2.2
-        with:
-          host: ${{secrets.SERVER_HOST}}
-          user: ${{secrets.SERVER_USERNAME}}
-          private_key: ${{secrets.SSH_PRIVATE_KEY}}
-          command: |
+        run: |
             git checkout release-${{ github.run_number }};
             git pull;
             docker push cr.yandex/${{secrets.REGISTRY_ID}}/app:${{ github.run_number }}
