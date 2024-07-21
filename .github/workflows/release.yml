@@ -80,9 +80,9 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{secrets.TOKEN}}
         with:
-          tag_name: ${{ github.ref }}
+          tag_name: release_${{ github.run_number }}
           release_name: Release version ${{ github.run_number }}
           draft: false
           prerelease: false
