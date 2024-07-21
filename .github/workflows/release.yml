@@ -93,26 +93,13 @@ jobs:
     steps:
       - name: Create team sync issue
         run: |
-          if [[ $CLOSE_PREVIOUS == true ]]; then
-            previous_issue_number=$(gh issue list \
-              --label "$LABELS" \
-              --json number \
-              --jq '.[0].number')
-            if [[ -n $previous_issue_number ]]; then
-              gh issue close "$previous_issue_number"
-            fi
-          fi
           new_issue_url=$(gh issue create \
             --title "$TITLE" \
-            --assignee "$ASSIGNEES" \
-            --label "$LABELS" \
             --body "$BODY")
         env:
           GH_TOKEN: ${{secrets.TOKEN}}
           GH_REPO: ${{ github.repository }}
-          TITLE: Team sync
-          ASSIGNEES: monalisa,doctocat,hubot
-          LABELS: weekly sync,docs-team
+          TITLE: Release version$ {{ github.run_number }}
           BODY: |
             ### Agenda
 
