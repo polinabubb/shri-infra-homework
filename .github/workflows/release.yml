@@ -79,7 +79,6 @@ jobs:
           release_name: Release version ${{ github.run_number }}
           draft: false
           prerelease: false
-        
 
 
   create_issue:
@@ -89,7 +88,7 @@ jobs:
     permissions:
       issues: write
     steps:
-      - name: Create team sync issue
+      - name: Create issue
         run: |
           new_issue_url=$(gh issue create \
             --title "$TITLE" \
@@ -99,7 +98,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
           TITLE: Release version ${{ github.run_number }}
           BODY: |
-              Дата: $(date)
+              Дата: 
               Автор: ${{ github.actor }}
               Номер версии: ${{ github.run_number }}
               Список коммитов:
@@ -112,16 +111,13 @@ jobs:
     name: Write in changelog
     needs: create_release
     runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2  
-      with:
-        fetch-depth: 0  
+    steps:  
    
     - name: Download and Install git-cliff
       run: |  
-        curl -L "https://github.com/orhun/git-cliff/releases/download/v2.2.1/git-cliff-2.2.1-x86_64-unknown-linux-gnu.tar.gz" -o git-cliff.tar.gz  # Скачивание git-cliff
-        tar -xzf git-cliff.tar.gz  # Распаковка скачанного архива
-        mv git-cliff-2.2.1/git-cliff /usr/local/bin/  # Перемещение исполняемого файла git-cliff в директорию /usr/local/bin
+        curl -L "https://github.com/orhun/git-cliff/releases/download/v2.2.1/git-cliff-2.2.1-x86_64-unknown-linux-gnu.tar.gz" -o git-cliff.tar.gz
+        tar -xzf git-cliff.tar.gz  
+        mv git-cliff-2.2.1/git-cliff /usr/local/bin/ 
     - name: Generate Changelog
       run: git-cliff --config cliff.toml --output CHANGELOG.md  
      

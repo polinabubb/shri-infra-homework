@@ -103,7 +103,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
           TITLE: Fix release version ${{ env.release_version }}
           BODY: |
-              Дата: $(date)
+              Дата: 
               Автор: ${{ github.actor }}
               Номер версии: ${{ env.release_version}}
               Список коммитов:
