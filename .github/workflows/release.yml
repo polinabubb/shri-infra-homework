@@ -1,7 +1,5 @@
 name: 'Release'
 on:
-  release:
-    types: [published]
   workflow_dispatch:
 
 jobs:
@@ -99,14 +97,13 @@ jobs:
         env:
           GH_TOKEN: ${{secrets.TOKEN}}
           GH_REPO: ${{ github.repository }}
-          TITLE: Release version$ {{ github.run_number }}
+          TITLE: Release version ${{ github.run_number }}
           BODY: |
-            ### Agenda
-
-            - [ ] Start the recording
-            - [ ] Check-ins
-            - [ ] Discussion points
-            - [ ] Post the recording
+              Дата: 
+              Автор: ${{ github.actor }}
+              Номер версии: ${{ github.run_number }}
+              Список коммитов:
+              Ссылка на образ:
 
           PINNED: false
           CLOSE_PREVIOUS: false
