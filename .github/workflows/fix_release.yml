@@ -1,8 +1,10 @@
 name: 'Fix release'
 on:
-    release:
-      types:
-        - edited
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: Версия релиза
+        required: true
 env: 
   release_version: ${{ github.event.inputs.release_version }}
 jobs:
@@ -27,21 +29,9 @@ jobs:
           npm run lint
           npm run test
   
-        
-  stop_containers:
-    name: 'Stop other docker containers'
-    needs: test
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Stop other docker containers
-        run: |
-          docker stop $(docker ps -a -q)
-          docker rm $(docker ps -qa)
-
   deploy:
     name: 'Deploy docker'
-    needs: stop_containers
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
@@ -94,6 +84,33 @@ jobs:
           release_name: Fix ${{ github.run_number }} release version ${{env.release_version }}
           draft: false
           prerelease: false
+
+
+  create_issue:
+    name: Create issue
+    needs: create_release
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Create team sync issue
+        run: |
+          new_issue_url=$(gh issue create \
+            --title "$TITLE" \
+            --body "$BODY")
+        env:
+          GH_TOKEN: ${{secrets.TOKEN}}
+          GH_REPO: ${{ github.repository }}
+          TITLE: Fix release version ${{ env.release_version }}
+          BODY: |
+              Дата: $(date)
+              Автор: ${{ github.actor }}
+              Номер версии: ${{ env.release_version}}
+              Список коммитов:
+              Ссылка на образ: cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra-2024:${{env.release_version }}_fix${{ github.run_number }}
+
+          PINNED: false
+          CLOSE_PREVIOUS: false
 
 
     

@@ -1,0 +1,36 @@
+name: 'Prod'
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: Версия релиза
+        required: true
+env: 
+  release_version: ${{ github.event.inputs.release_version }}
+
+
+jobs:
+
+  create_issue:
+    name: Create issue
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Create team sync issue
+        run: |
+          new_issue_url=$(gh issue create \
+            --title "$TITLE" \
+            --body "$BODY")
+        env:
+          GH_TOKEN: ${{secrets.TOKEN}}
+          GH_REPO: ${{ github.repository }}
+          TITLE: Релиз ${{ env.release_version }} выкачен в прод
+          BODY: |
+              Дата: $(date)
+              Автор: ${{ github.actor }}
+          PINNED: false
+          CLOSE_PREVIOUS: false
+
+
+  
