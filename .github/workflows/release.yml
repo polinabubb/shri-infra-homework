@@ -107,22 +107,3 @@ jobs:
           PINNED: false
           CLOSE_PREVIOUS: false
 
-  write_in_changelog:
-    name: Write in changelog
-    needs: create_release
-    runs-on: ubuntu-latest
-    steps:  
-   
-    - name: Download and Install git-cliff
-      run: |  
-        curl -L "https://github.com/orhun/git-cliff/releases/download/v2.2.1/git-cliff-2.2.1-x86_64-unknown-linux-gnu.tar.gz" -o git-cliff.tar.gz
-        tar -xzf git-cliff.tar.gz  
-        mv git-cliff-2.2.1/git-cliff /usr/local/bin/ 
-     
-    - name: Commit Changelog
-      run: |  
-        git config --global user.name 'github-actions'
-        git config --global user.email 'github-actions@github.com'
-        git add CHANGELOG.md
-        git commit -m "Обновление CHANGELOG.md"
-        git push https://github.com/${{ github.repository }}.git HEAD:main  
