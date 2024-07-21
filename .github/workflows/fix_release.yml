@@ -3,10 +3,11 @@ on:
     release:
       types:
         - edited
-
+env: 
+  release_version: ${{ github.event.inputs.release_version }}
 jobs:
-  build: 
-    name: 'fix release ${{ github.event.inputs.release_version }}'
+  test: 
+    name: 'Test'
     runs-on: ubuntu-latest
 
     steps:
@@ -21,18 +22,79 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run lint
-        run: npm run lint
-
       - name: Run tests
-        run: npm run test
+        run: |
+          npm run lint
+          npm run test
+  
+        
+  stop_containers:
+    name: 'Stop other docker containers'
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Stop other docker containers
+        run: |
+          docker stop $(docker ps -a -q)
+          docker rm $(docker ps -qa)
+
+  deploy:
+    name: 'Deploy docker'
+    needs: stop_containers
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Create branch
+        uses: peterjgrainger/action-create-branch@v2.2.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          branch: release-${{ env.release_version }}
+      
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: release-${{ env.release_version }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Login
+        run: |
+            echo ${{secrets.OAUTH_TOKEN}} | docker login --username oauth --password-stdin cr.yandex
+
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build docker image
+        run: |
+            docker build -t cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra-2024:${{env.release_version }}_fix${{ github.run_number }} .
+      
+      - name: Uploads to the Container Registry
+        run: |
+            docker tag cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra-2024:${{env.release_version }}_fix${{ github.run_number }} cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra-2024:${{ env.release_version  }}_latest
+            docker push cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra-2024:${{env.release_version }}_fix${{ github.run_number }}
+            docker push cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra-2024:${{ env.release_version  }}_latest
+            
+  create_release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.TOKEN}}
+        with:
+          tag_name: release_${{env.release_version }}_fix${{ github.run_number }}
+          release_name: Fix ${{ github.run_number }} release version ${{env.release_version }}
+          draft: false
+          prerelease: false
 
 
-
-
-
-
-
-
-
-
+    
+   
