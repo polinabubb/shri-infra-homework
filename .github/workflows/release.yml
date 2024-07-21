@@ -4,9 +4,6 @@ on:
     types: [published]
   workflow_dispatch:
 
-
-
-
 jobs:
   test: 
     name: 'Test'
@@ -30,10 +27,20 @@ jobs:
           npm run test
   
         
+  stop_containers:
+    name: 'Stop other docker containers'
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Stop other docker containers
+        run: |
+          docker stop $(docker ps -a -q)
+          docker rm $(docker ps -qa)
 
   deploy:
     name: 'Deploy docker'
-    needs: test
+    needs: stop_containers
     runs-on: ubuntu-latest
 
     steps:
@@ -105,7 +112,6 @@ jobs:
               --jq '.[0].number')
             if [[ -n $previous_issue_number ]]; then
               gh issue close "$previous_issue_number"
-              gh issue unpin "$previous_issue_number"
             fi
           fi
           new_issue_url=$(gh issue create \
@@ -113,11 +119,8 @@ jobs:
             --assignee "$ASSIGNEES" \
             --label "$LABELS" \
             --body "$BODY")
-          if [[ $PINNED == true ]]; then
-            gh issue pin "$new_issue_url"
-          fi
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{secrets.TOKEN}}
           GH_REPO: ${{ github.repository }}
           TITLE: Team sync
           ASSIGNEES: monalisa,doctocat,hubot
@@ -130,9 +133,5 @@ jobs:
             - [ ] Discussion points
             - [ ] Post the recording
 
-            ### Discussion Points
-            Add things to discuss below
-
-            - [Work this week](https://github.com/orgs/github/projects/3)
           PINNED: false
           CLOSE_PREVIOUS: false
