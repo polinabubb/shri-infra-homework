@@ -6,6 +6,7 @@ on:
 
 
 
+
 jobs:
   test: 
     name: 'Test'
@@ -31,7 +32,7 @@ jobs:
         
 
   deploy:
-    name: 'Release version ${{ github.run_number }}'
+    name: 'Deploy docker'
     needs: test
     runs-on: ubuntu-latest
 
@@ -69,10 +70,29 @@ jobs:
             docker tag cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra-2024:${{ github.run_number }} cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra-2024:${{ github.run_number }}_latest
             docker push cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra-2024:${{ github.run_number }}
             docker push cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra-2024:${{ github.run_number }}_latest 
+            
+  create_release:
+    name: Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release version ${{ github.run_number }}
+          body: |
+            Changes in this Release
+          draft: false
+          prerelease: false
+
 
   create_issue:
-    name: Create team sync issue
-    needs: deploy
+    name: Create issue
+    needs: create_release
     runs-on: ubuntu-latest
     permissions:
       issues: write
