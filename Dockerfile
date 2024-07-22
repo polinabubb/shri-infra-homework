@@ -8,5 +8,5 @@ COPY package-lock.json .
 RUN npm ci
 
 COPY . .
-
-CMD ["npm", "start"]
+RUN npm run build
+CMD npm start
