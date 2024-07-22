@@ -23,7 +23,7 @@ jobs:
             docker pull cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra-2024:${{ env.release_version  }}_latest
 
       - name:  Run Docker
-        run:  docker run -dp 3000:3000 cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra-2024:${{ env.release_version  }}_latest
+        run:  docker run cr.yandex/${{secrets.REGISTRY_ID}}/shri-infra-2024:${{ env.release_version  }}_latest
 
   create_issue:
     name: Create issue
